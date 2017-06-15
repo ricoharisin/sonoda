@@ -9,7 +9,7 @@ import (
     "strconv"
 )
 
-const mainUrl string = "https://api.github.com/repos/tokopedia/android-tokopedia/pulls"
+const mainUrl string = "https://api.github.com/repos/tokopedia/android-tokopedia-core/pulls"
 
 func main() {
 	client := &http.Client{}
