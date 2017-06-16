@@ -9,19 +9,35 @@ import (
     "strconv"
 )
 
-const mainUrl string = "https://api.github.com/repos/tokopedia/android-tokopedia-core/pulls"
+var mainUrl string
+var tokenAuth string
 
 func main() {
+
+	tokenAuth,mainUrl = getConfig()
+
 	client := &http.Client{}
 
 	req, _ := http.NewRequest("GET", mainUrl, nil)
-	req.Header.Add("Authorization", "token f66d639702c0a0d792251fb7e3c06386d54df629")
+	req.Header.Add("Authorization", "token "+tokenAuth)
 	resp, _ := client.Do(req)
 
 	stringResponse := getStringFromResponse(resp)
 
 	checkPullRequest(getByteFromString(stringResponse))
 
+}
+
+func getConfig() (string, string) {
+    raw, err := ioutil.ReadFile("./config.json")
+    if err != nil {
+    	fmt.Println("No config.json file found!! please create one")
+        panic(err)
+    }
+
+    var config map[string]interface{}
+    json.Unmarshal(raw, &config)
+    return config["token"].(string), config["endpoint"].(string)
 }
 
 func getStringFromResponse(response *http.Response) (string) {
@@ -57,7 +73,7 @@ func getPullRequestReviews(number string) ([]byte) {
 	client := &http.Client{}
 
 	req, _ := http.NewRequest("GET", mainUrl+"/"+number+"/reviews", nil)
-	req.Header.Add("Authorization", "token f66d639702c0a0d792251fb7e3c06386d54df629")
+	req.Header.Add("Authorization", "token "+tokenAuth)
 	resp, _ := client.Do(req)
 
 	stringResponse := getStringFromResponse(resp)
@@ -69,7 +85,7 @@ func getPullRequestFilesChanged(number string) ([]byte) {
 	client := &http.Client{}
 
 	req, _ := http.NewRequest("GET", mainUrl+"/"+number+"/files", nil)
-	req.Header.Add("Authorization", "token f66d639702c0a0d792251fb7e3c06386d54df629")
+	req.Header.Add("Authorization", "token "+tokenAuth)
 	resp, _ := client.Do(req)
 
 	stringResponse := getStringFromResponse(resp)
@@ -172,6 +188,6 @@ func mergePullRequest(number int) {
 	client := &http.Client{}
 
 	req, _ := http.NewRequest("PUT", mainUrl+"/"+numberString+"/merge", nil)
-	req.Header.Add("Authorization", "token f66d639702c0a0d792251fb7e3c06386d54df629")
+	req.Header.Add("Authorization", "token "+tokenAuth)
 	client.Do(req)
 }
