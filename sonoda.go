@@ -11,10 +11,17 @@ import (
 
 var mainUrl string
 var tokenAuth string
+var listAssignee []string
+
+type GlobalConfig struct {
+	Token string `json:"token"`
+	Endpoint string `json:"endpoint"`
+	ListAssignee []string `json:"list_assignee"`
+}
 
 func main() {
 
-	tokenAuth,mainUrl = getConfig()
+	tokenAuth,mainUrl,listAssignee = getConfig()
 
 	client := &http.Client{}
 
@@ -22,22 +29,27 @@ func main() {
 	req.Header.Add("Authorization", "token "+tokenAuth)
 	resp, _ := client.Do(req)
 
+	fmt.Println(listAssignee)
+
 	stringResponse := getStringFromResponse(resp)
 
-	checkPullRequest(getByteFromString(stringResponse))
+	fmt.Println(stringResponse)
+
+	//checkPullRequest(getByteFromString(stringResponse))
 
 }
 
-func getConfig() (string, string) {
+func getConfig() (string, string, []string) {
+	globalConfig := &GlobalConfig{}
     raw, err := ioutil.ReadFile("./config.json")
     if err != nil {
     	fmt.Println("No config.json file found!! please create one")
         panic(err)
     }
 
-    var config map[string]interface{}
-    json.Unmarshal(raw, &config)
-    return config["token"].(string), config["endpoint"].(string)
+    //var config map[string]interface{}
+    json.Unmarshal(raw, &globalConfig)
+    return globalConfig.Token, globalConfig.Endpoint, globalConfig.ListAssignee
 }
 
 func getStringFromResponse(response *http.Response) (string) {
